@@ -1,0 +1,407 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  PlusCircle, 
+  Trash2, 
+  Music, 
+  Copy,
+  CheckCircle2,
+  Settings,
+  ChevronRight,
+  Zap,
+  Eye,
+  Edit3
+} from 'lucide-react';
+
+const THOMANN_COLORS = {
+  turquoise: '#00b5bd',
+  black: '#000000',
+  white: '#ffffff',
+  slate: '#f8fafc'
+};
+
+const FORMAT_TEMPLATES = {
+  "Paid Social Media Campaign": {
+    description: "Highly targeted full-funnel advertising across Meta (Instagram/Facebook) and TikTok. We leverage Thomann's exclusive 1st-party data to reach verified music creators and purchasing decision-makers.",
+    defaultBudget: 2500,
+    kpis: ["Reach", "CTR", "ROAS"]
+  },
+  "Rich Content": {
+    description: "Premium A+ Brand Content implementation on your product detail pages. Includes high-fidelity image galleries, technical comparison modules, and interactive storytelling to optimize conversion.",
+    defaultBudget: 1500,
+    kpis: ["CVR Lift", "Time on Page"]
+  },
+  "Google Ad Campaign": {
+    description: "Strategic Search and Shopping placement capturing high-intent traffic at the 'point of search'. Includes campaign management and performance optimization by our in-house certified specialists.",
+    defaultBudget: 3000,
+    kpis: ["Impressions", "Direct Sales"]
+  },
+  "Sponsored YouTube Video": {
+    description: "Authentic product integration or dedicated review on Thomann's leading YouTube channels. Expert demos by professional musicians ensuring maximum credibility within the community.",
+    defaultBudget: 5000,
+    kpis: ["Views", "Engagement", "Brand Sentiment"]
+  }
+};
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('input');
+  const [brandName, setBrandName] = useState('');
+  const [campaignName, setCampaignName] = useState('');
+  const [selectedFormats, setSelectedFormats] = useState([]);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const addFormat = (formatName) => {
+    const template = FORMAT_TEMPLATES[formatName];
+    const newEntry = {
+      id: crypto.randomUUID(),
+      name: formatName,
+      description: template.description,
+      budget: template.defaultBudget,
+      kpis: template.kpis
+    };
+    setSelectedFormats([...selectedFormats, newEntry]);
+  };
+
+  const updateBudget = (id, value) => {
+    setSelectedFormats(selectedFormats.map(f => 
+      f.id === id ? { ...f, budget: parseFloat(value) || 0 } : f
+    ));
+  };
+
+  const removeFormat = (id) => {
+    setSelectedFormats(selectedFormats.filter(f => f.id !== id));
+  };
+
+  const totalNet = useMemo(() => {
+    return selectedFormats.reduce((sum, item) => sum + item.budget, 0);
+  }, [selectedFormats]);
+
+  const copyToClipboard = () => {
+    const element = document.getElementById('proposal-content');
+    const range = document.createRange();
+    range.selectNode(element);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  // SVG Thomann Logo "t"
+  const ThomannLogo = ({ color = "#00b5bd" }) => (
+    <svg viewBox="0 0 100 100" className="w-12 h-12">
+      <circle cx="50" cy="50" r="48" fill="none" stroke={color} strokeWidth="4"/>
+      <path 
+        d="M35 30 V45 H25 V55 H35 V75 C35 82 40 85 48 85 H60 V75 H52 C48 75 46 74 46 70 V55 H65 V45 H46 V30 Z" 
+        fill={color} 
+        transform="rotate(-5 50 50)"
+      />
+    </svg>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#ffffff] font-body text-[#000000] flex flex-col">
+      {/* GLOBAL HEADER & NAVIGATION */}
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-[#00b5bd] p-2">
+              <Zap className="text-white h-4 w-4 fill-current" />
+            </div>
+            <h1 className="font-headline text-lg uppercase tracking-tight leading-none hidden sm:block">
+              THOMANN<br/><span className="text-[#00b5bd]">RETAIL MEDIA</span>
+            </h1>
+          </div>
+
+          <nav className="flex bg-slate-100 p-1 rounded-full">
+            <button 
+              onClick={() => setActiveTab('input')}
+              className={`flex items-center gap-2 px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'input' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
+            >
+              <Edit3 className="h-3 w-3" />
+              Configure
+            </button>
+            <button 
+              onClick={() => setActiveTab('output')}
+              className={`flex items-center gap-2 px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'output' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
+            >
+              <Eye className="h-3 w-3" />
+              Preview
+            </button>
+          </nav>
+
+          <div className="hidden md:block">
+            {activeTab === 'output' ? (
+              <button 
+                onClick={copyToClipboard}
+                className={`flex items-center gap-2 px-5 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${copySuccess ? 'bg-green-500 text-white' : 'bg-[#00b5bd] text-white hover:bg-black shadow-lg'}`}
+              >
+                {copySuccess ? <CheckCircle2 className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copySuccess ? 'Copied' : 'Export Content'}
+              </button>
+            ) : (
+              <div className="text-right">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Net Total</p>
+                <p className="text-lg font-bold italic tracking-tighter text-[#00b5bd]">€ {totalNet.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 relative overflow-y-auto">
+        {activeTab === 'input' && (
+          <div className="max-w-4xl mx-auto p-8 md:p-12">
+            <div className="space-y-12">
+              {/* Campaign Details */}
+              <section className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-5 bg-[#00b5bd]"></div>
+                  <h2 className="font-headline text-md uppercase tracking-wide">Campaign Context</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="relative group">
+                    <input 
+                      type="text" 
+                      placeholder=" "
+                      className="peer w-full px-0 py-3 bg-transparent border-b-2 border-slate-100 focus:border-[#00b5bd] outline-none transition-all font-bold text-lg placeholder-transparent"
+                      value={brandName}
+                      onChange={(e) => setBrandName(e.target.value)}
+                    />
+                    <label className="absolute left-0 top-0 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-[10px] peer-focus:text-[#00b5bd]">Brand Partner</label>
+                  </div>
+                  <div className="relative group">
+                    <input 
+                      type="text" 
+                      placeholder=" "
+                      className="peer w-full px-0 py-3 bg-transparent border-b-2 border-slate-100 focus:border-[#00b5bd] outline-none transition-all font-bold text-lg placeholder-transparent"
+                      value={campaignName}
+                      onChange={(e) => setCampaignName(e.target.value)}
+                    />
+                    <label className="absolute left-0 top-0 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-[10px] peer-focus:text-[#00b5bd]">Campaign Name</label>
+                  </div>
+                </div>
+              </section>
+
+              {/* Service Selection */}
+              <section className="space-y-6">
+                <div className="flex items-center justify-between border-b border-black pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-5 bg-black"></div>
+                    <h2 className="font-headline text-md uppercase tracking-wide">Formats</h2>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Object.keys(FORMAT_TEMPLATES).map(name => (
+                    <button
+                      key={name}
+                      onClick={() => addFormat(name)}
+                      className="group p-4 bg-slate-50 hover:bg-[#00b5bd] hover:text-white transition-all text-left flex justify-between items-center"
+                    >
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-widest block">{name}</span>
+                      </div>
+                      <PlusCircle className="h-4 w-4 opacity-20 group-hover:opacity-100 transition-all" />
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Selected Mix */}
+              <section className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-5 bg-[#00b5bd]"></div>
+                  <h2 className="font-headline text-md uppercase tracking-wide">Your Campaign Mix</h2>
+                </div>
+                <div className="space-y-3">
+                  {selectedFormats.map((format) => (
+                    <div key={format.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 bg-white border border-slate-100 hover:border-[#00b5bd]/40 transition-all">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-xs uppercase tracking-widest mb-1">{format.name}</h4>
+                        <p className="text-[10px] text-slate-400 max-w-md font-medium">{format.description.substring(0, 100)}...</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-end">
+                          <label className="text-[9px] font-bold text-slate-300 uppercase mb-1">Budget (NET)</label>
+                          <div className="flex items-center">
+                            <span className="text-xs font-bold mr-1">€</span>
+                            <input 
+                              type="number"
+                              className="w-24 bg-slate-50 px-2 py-1.5 text-right font-mono font-bold text-sm outline-none focus:ring-1 focus:ring-[#00b5bd]"
+                              value={format.budget}
+                              onChange={(e) => updateBudget(format.id, e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => removeFormat(format.id)}
+                          className="p-1 text-slate-200 hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </div>
+        )}
+
+        {/* OUTPUT TAB */}
+        {activeTab === 'output' && (
+          <div className="bg-[#f1f5f9] min-h-full py-8 md:py-12 px-6 overflow-y-auto">
+            <div className="max-w-[800px] mx-auto">
+              <div id="proposal-content" className="bg-white p-12 md:p-16 shadow-xl text-black min-h-[1000px] flex flex-col font-body text-sm leading-tight">
+                
+                {/* CI Header - Smaller & Sleeker */}
+                <div className="flex justify-between items-start mb-16">
+                  <div className="border-l-[10px] border-[#00b5bd] pl-6">
+                    <h1 className="font-headline text-4xl uppercase tracking-tight leading-[0.9] mb-2">
+                      MARKETING<br/>PROPOSAL
+                    </h1>
+                    <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-slate-400">
+                      Thomann <span className="text-[#00b5bd]">Retail Media</span> Portfolio
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <ThomannLogo />
+                  </div>
+                </div>
+
+                {/* Context - Condensed */}
+                <div className="mb-12 grid grid-cols-12 gap-6">
+                  <div className="col-span-12 md:col-span-8">
+                    <h2 className="font-headline text-xs uppercase tracking-wide text-[#00b5bd] mb-3">Partner</h2>
+                    <h3 className="font-headline text-3xl tracking-tight leading-none mb-2">{brandName || '[Brand Partner]'}</h3>
+                    <p className="text-lg font-bold text-slate-400 italic">Campaign: {campaignName || '[Campaign Name]'}</p>
+                  </div>
+                  <div className="col-span-12 md:col-span-4 pt-1.5 border-t-2 border-black">
+                    <p className="text-[9px] font-bold uppercase tracking-widest mb-1">Date</p>
+                    <p className="font-bold">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                  </div>
+                </div>
+
+                {/* Strategy List - Tightened vertical spacing */}
+                <div className="mb-12 flex-1">
+                  <h3 className="font-headline text-[10px] uppercase tracking-wide text-[#00b5bd] mb-8 border-b border-slate-100 pb-2">Tactical Breakdown</h3>
+                  <div className="space-y-8">
+                    {selectedFormats.map((format, idx) => (
+                      <div key={format.id} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="col-span-1 font-headline text-2xl text-slate-100">
+                          {(idx + 1).toString().padStart(2, '0')}
+                        </div>
+                        <div className="col-span-11">
+                          <h4 className="font-headline text-black uppercase text-lg mb-1.5 tracking-tight">
+                            {format.name}
+                          </h4>
+                          <p className="text-xs leading-normal text-slate-600 mb-3 max-w-2xl font-medium">
+                            {format.description}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {format.kpis?.map(kpi => (
+                              <span key={kpi} className="px-2 py-0.5 bg-black text-[#00b5bd] text-[8px] font-bold uppercase tracking-wider">
+                                {kpi}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {selectedFormats.length === 0 && (
+                      <p className="text-xs italic text-slate-300">No formats included.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Summary Box - Compact */}
+                <div className="mt-8">
+                  <div className="bg-black p-8 text-white relative overflow-hidden">
+                    <div className="absolute -right-6 -bottom-6 opacity-5 rotate-12 pointer-events-none scale-75">
+                      <ThomannLogo color="#ffffff" />
+                    </div>
+
+                    <h3 className="font-headline text-[10px] uppercase tracking-wide mb-6 text-[#00b5bd]">Financial Commitment</h3>
+                    
+                    <div className="space-y-3 mb-8 relative z-10">
+                      {selectedFormats.map(f => (
+                        <div key={f.id} className="flex justify-between items-center group">
+                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">{f.name}</span>
+                          <div className="flex-1 mx-4 border-b border-white/10 border-dotted"></div>
+                          <span className="font-mono font-bold text-xs">€ {f.budget.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col md:flex-row justify-between items-end pt-6 border-t-2 border-[#00b5bd] relative z-10">
+                      <div>
+                        <h4 className="font-headline text-2xl uppercase tracking-tight italic">Total Net</h4>
+                        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#00b5bd] mt-1">Pricing excl. VAT</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-headline text-4xl text-white italic tracking-tighter">
+                          € {totalNet.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex justify-between items-center text-[8px] font-bold uppercase tracking-[0.2em] text-slate-300">
+                    <p>Thomann Retail Media Agency • Hans-Thomann-Str. 1 • 96138 Burgebrach</p>
+                    <p>Ref: #{Math.floor(Math.random() * 90000) + 10000}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
+        
+        :root {
+          --font-headline: 'Phosphate Solid', 'Phosphate', 'Arial Black', sans-serif;
+          --font-body: 'Open Sans', sans-serif;
+        }
+
+        body {
+          font-family: var(--font-body);
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .font-headline {
+          font-family: var(--font-headline);
+          letter-spacing: -0.01em;
+        }
+
+        .font-body {
+          font-family: var(--font-body);
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #00b5bd;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default App;
