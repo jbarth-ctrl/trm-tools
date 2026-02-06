@@ -13,53 +13,21 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/lucide-react@latest"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
-        
-        :root {
-            --font-headline: 'Phosphate Solid', 'Phosphate', 'Arial Black', sans-serif;
-            --font-body: 'Open Sans', sans-serif;
-        }
-
-        body {
-            font-family: 'Open Sans', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .font-headline {
-            font-family: var(--font-headline);
-            letter-spacing: -0.01em;
-        }
-
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #00b5bd;
-            border-radius: 3px;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-white">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo } = React;
-        const { 
-            PlusCircle, Trash2, Music, Copy, CheckCircle2, 
-            Settings, ChevronRight, Zap, Eye, Edit3 
-        } = lucide;
+
+        // Correctly accessing Lucide icons from the global 'lucide' object provided by the CDN
+        const PlusCircle = (props) => <i data-lucide="plus-circle" {...props}></i>;
+        const Trash2 = (props) => <i data-lucide="trash-2" {...props}></i>;
+        const Copy = (props) => <i data-lucide="copy" {...props}></i>;
+        const CheckCircle2 = (props) => <i data-lucide="check-circle-2" {...props}></i>;
+        const Zap = (props) => <i data-lucide="zap" {...props}></i>;
+        const Eye = (props) => <i data-lucide="eye" {...props}></i>;
+        const Edit3 = (props) => <i data-lucide="edit-3" {...props}></i>;
 
         const FORMAT_TEMPLATES = {
             "Paid Social Media Campaign": {
@@ -102,6 +70,13 @@
             const [selectedFormats, setSelectedFormats] = useState([]);
             const [copySuccess, setCopySuccess] = useState(false);
 
+            // Re-initialize Lucide icons whenever the tab changes or formats are added
+            React.useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [activeTab, selectedFormats]);
+
             const addFormat = (formatName) => {
                 const template = FORMAT_TEMPLATES[formatName];
                 const newEntry = {
@@ -142,14 +117,14 @@
             };
 
             return (
-                <div className="min-h-screen bg-[#ffffff] flex flex-col">
+                <div className="min-h-screen bg-white flex flex-col font-sans">
                     <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="bg-[#00b5bd] p-2">
-                                    <Zap className="text-white h-4 w-4 fill-current" />
+                                <div className="bg-[#00b5bd] p-2 rounded">
+                                    <Zap className="text-white w-4 h-4" />
                                 </div>
-                                <h1 className="font-headline text-lg uppercase tracking-tight leading-none hidden sm:block">
+                                <h1 className="text-sm font-black uppercase tracking-tight leading-none hidden sm:block">
                                     THOMANN<br/><span className="text-[#00b5bd]">RETAIL MEDIA</span>
                                 </h1>
                             </div>
@@ -159,14 +134,14 @@
                                     onClick={() => setActiveTab('input')}
                                     className={`flex items-center gap-2 px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'input' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
                                 >
-                                    <Edit3 className="h-3 w-3" />
+                                    <Edit3 className="w-3 h-3" />
                                     Configure
                                 </button>
                                 <button 
                                     onClick={() => setActiveTab('output')}
                                     className={`flex items-center gap-2 px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'output' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
                                 >
-                                    <Eye className="h-3 w-3" />
+                                    <Eye className="w-3 h-3" />
                                     Preview
                                 </button>
                             </nav>
@@ -185,16 +160,16 @@
                                     <section className="space-y-6">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1.5 h-5 bg-[#00b5bd]"></div>
-                                            <h2 className="font-headline text-md uppercase tracking-wide">Campaign Context</h2>
+                                            <h2 className="text-sm font-black uppercase tracking-wide">Campaign Context</h2>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div className="relative">
-                                                <input type="text" className="peer w-full px-0 py-3 bg-transparent border-b-2 border-slate-100 focus:border-[#00b5bd] outline-none transition-all font-bold text-lg" value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder=" " />
-                                                <label className="absolute left-0 top-0 text-[10px] font-bold uppercase tracking-widest text-slate-400">Brand Partner</label>
+                                            <div className="relative border-b-2 border-slate-100 focus-within:border-[#00b5bd]">
+                                                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Brand Partner</label>
+                                                <input type="text" className="w-full py-2 bg-transparent outline-none font-bold text-lg" value={brandName} onChange={(e) => setBrandName(e.target.value)} />
                                             </div>
-                                            <div className="relative">
-                                                <input type="text" className="peer w-full px-0 py-3 bg-transparent border-b-2 border-slate-100 focus:border-[#00b5bd] outline-none transition-all font-bold text-lg" value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder=" " />
-                                                <label className="absolute left-0 top-0 text-[10px] font-bold uppercase tracking-widest text-slate-400">Campaign Name</label>
+                                            <div className="relative border-b-2 border-slate-100 focus-within:border-[#00b5bd]">
+                                                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Campaign Name</label>
+                                                <input type="text" className="w-full py-2 bg-transparent outline-none font-bold text-lg" value={campaignName} onChange={(e) => setCampaignName(e.target.value)} />
                                             </div>
                                         </div>
                                     </section>
@@ -202,13 +177,13 @@
                                     <section className="space-y-6">
                                         <div className="flex items-center gap-3 border-b border-black pb-2">
                                             <div className="w-1.5 h-5 bg-black"></div>
-                                            <h2 className="font-headline text-md uppercase tracking-wide">Formats</h2>
+                                            <h2 className="text-sm font-black uppercase tracking-wide">Formats</h2>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {Object.keys(FORMAT_TEMPLATES).map(name => (
                                                 <button key={name} onClick={() => addFormat(name)} className="group p-4 bg-slate-50 hover:bg-[#00b5bd] hover:text-white transition-all text-left flex justify-between items-center">
                                                     <span className="text-[11px] font-bold uppercase tracking-widest block">{name}</span>
-                                                    <PlusCircle className="h-4 w-4 opacity-20 group-hover:opacity-100 transition-all" />
+                                                    <PlusCircle className="w-4 h-4 opacity-20 group-hover:opacity-100 transition-all" />
                                                 </button>
                                             ))}
                                         </div>
@@ -217,7 +192,7 @@
                                     <section className="space-y-6">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1.5 h-5 bg-[#00b5bd]"></div>
-                                            <h2 className="font-headline text-md uppercase tracking-wide">Your Campaign Mix</h2>
+                                            <h2 className="text-sm font-black uppercase tracking-wide">Your Campaign Mix</h2>
                                         </div>
                                         <div className="space-y-3">
                                             {selectedFormats.map((format) => (
@@ -235,11 +210,14 @@
                                                             </div>
                                                         </div>
                                                         <button onClick={() => removeFormat(format.id)} className="p-1 text-slate-200 hover:text-red-600 transition-colors">
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>
                                             ))}
+                                            {selectedFormats.length === 0 && (
+                                                <p className="text-xs text-slate-400 italic py-4">Add some formats from the section above to get started.</p>
+                                            )}
                                         </div>
                                     </section>
                                 </div>
@@ -247,10 +225,16 @@
                         ) : (
                             <div className="bg-[#f1f5f9] min-h-full py-12 px-6">
                                 <div className="max-w-[800px] mx-auto">
-                                    <div id="proposal-content" className="bg-white p-12 md:p-16 shadow-xl text-black min-h-[1000px] flex flex-col font-body text-sm leading-tight">
+                                    <div className="mb-4 flex justify-end">
+                                        <button onClick={copyToClipboard} className={`flex items-center gap-2 px-6 py-2 rounded shadow-lg text-[10px] font-bold uppercase tracking-widest transition-all ${copySuccess ? 'bg-green-600 text-white' : 'bg-[#00b5bd] text-white hover:bg-black'}`}>
+                                            {copySuccess ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                            {copySuccess ? 'Copied to Clipboard' : 'Copy Content'}
+                                        </button>
+                                    </div>
+                                    <div id="proposal-content" className="bg-white p-12 md:p-16 shadow-xl text-black min-h-[1000px] flex flex-col font-sans text-sm leading-tight">
                                         <div className="flex justify-between items-start mb-16">
                                             <div className="border-l-[10px] border-[#00b5bd] pl-6">
-                                                <h1 className="font-headline text-4xl uppercase tracking-tight leading-[0.9] mb-2">MARKETING<br/>PROPOSAL</h1>
+                                                <h1 className="text-4xl font-black uppercase tracking-tight leading-[0.9] mb-2">MARKETING<br/>PROPOSAL</h1>
                                                 <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-slate-400">Thomann <span className="text-[#00b5bd]">Retail Media</span> Portfolio</p>
                                             </div>
                                             <div className="text-right"><ThomannLogo /></div>
@@ -258,8 +242,8 @@
 
                                         <div className="mb-12 grid grid-cols-12 gap-6">
                                             <div className="col-span-8">
-                                                <h2 className="font-headline text-xs uppercase tracking-wide text-[#00b5bd] mb-3">Partner</h2>
-                                                <h3 className="font-headline text-3xl tracking-tight leading-none mb-2">{brandName || '[Brand Partner]'}</h3>
+                                                <h2 className="text-[10px] font-black uppercase tracking-wide text-[#00b5bd] mb-3">Partner</h2>
+                                                <h3 className="text-3xl font-black tracking-tight leading-none mb-2">{brandName || '[Brand Partner]'}</h3>
                                                 <p className="text-lg font-bold text-slate-400 italic">Campaign: {campaignName || '[Campaign Name]'}</p>
                                             </div>
                                             <div className="col-span-4 pt-1.5 border-t-2 border-black">
@@ -269,13 +253,13 @@
                                         </div>
 
                                         <div className="mb-12 flex-1">
-                                            <h3 className="font-headline text-[10px] uppercase tracking-wide text-[#00b5bd] mb-8 border-b border-slate-100 pb-2">Tactical Breakdown</h3>
+                                            <h3 className="text-[10px] font-black uppercase tracking-wide text-[#00b5bd] mb-8 border-b border-slate-100 pb-2">Tactical Breakdown</h3>
                                             <div className="space-y-8">
                                                 {selectedFormats.map((format, idx) => (
                                                     <div key={format.id} className="grid grid-cols-12 gap-4">
-                                                        <div className="col-span-1 font-headline text-2xl text-slate-100">{(idx + 1).toString().padStart(2, '0')}</div>
+                                                        <div className="col-span-1 text-2xl font-black text-slate-100">{(idx + 1).toString().padStart(2, '0')}</div>
                                                         <div className="col-span-11">
-                                                            <h4 className="font-headline text-black uppercase text-lg mb-1.5 tracking-tight">{format.name}</h4>
+                                                            <h4 className="text-black font-black uppercase text-lg mb-1.5 tracking-tight">{format.name}</h4>
                                                             <p className="text-xs leading-normal text-slate-600 mb-3 max-w-2xl font-medium">{format.description}</p>
                                                             <div className="flex flex-wrap gap-1.5">
                                                                 {format.kpis?.map(kpi => (
@@ -291,7 +275,7 @@
                                         <div className="mt-8">
                                             <div className="bg-black p-8 text-white relative overflow-hidden">
                                                 <div className="absolute -right-6 -bottom-6 opacity-5 rotate-12 pointer-events-none scale-75"><ThomannLogo color="#ffffff" /></div>
-                                                <h3 className="font-headline text-[10px] uppercase tracking-wide mb-6 text-[#00b5bd]">Financial Commitment</h3>
+                                                <h3 className="text-[10px] font-black uppercase tracking-wide mb-6 text-[#00b5bd]">Financial Commitment</h3>
                                                 <div className="space-y-3 mb-8 relative z-10">
                                                     {selectedFormats.map(f => (
                                                         <div key={f.id} className="flex justify-between items-center">
@@ -303,11 +287,11 @@
                                                 </div>
                                                 <div className="flex justify-between items-end pt-6 border-t-2 border-[#00b5bd] relative z-10">
                                                     <div>
-                                                        <h4 className="font-headline text-2xl uppercase tracking-tight italic">Total Net</h4>
+                                                        <h4 className="text-2xl font-black uppercase tracking-tight italic">Total Net</h4>
                                                         <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#00b5bd] mt-1">Pricing excl. VAT</p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="font-headline text-4xl text-white italic tracking-tighter">€ {totalNet.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+                                                        <span className="text-4xl font-black text-white italic tracking-tighter">€ {totalNet.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                                                     </div>
                                                 </div>
                                             </div>
