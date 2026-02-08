@@ -19,14 +19,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        body {
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+        body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .prevent-split { page-break-inside: avoid !important; break-inside: avoid !important; }
-        .print-container { width: 100%; max-width: 840px; margin: 0 auto; }
+        .print-container { width: 100%; max-width: 840px; margin: 0 auto; background: white; }
         @media print { .no-pdf { display: none !important; } }
     </style>
 </head>
@@ -36,7 +34,32 @@
     <script type="text/babel">
         const { useState, useMemo } = React;
 
-        // --- Inline SVG Icons to avoid Lucide loading issues ---
+        const ThomannLogo = ({ className = "w-12 h-12", size = 64 }) => (
+            <svg 
+                viewBox="0 0 567 567" 
+                className={className}
+                width={size} 
+                height={size}
+                xmlns="http://www.w3.org/2000/svg"
+                version="1.2"
+            >
+                <g id="Ebene_1">
+                    <path 
+                        fill="#00b2be" 
+                        fillRule="nonzero"
+                        d="m524.41 283.53c0-133.07-107.87-240.94-240.94-240.94-133.08 0-240.95 107.87-240.95 240.94 0 133.08 107.87 240.95 240.95 240.95 133.07 0 240.94-107.87 240.94-240.95z"
+                    />
+                    <g id="Group_Inner">
+                        <path 
+                            fill="#fefefe" 
+                            fillRule="nonzero"
+                            d="m355.43 209.99v42.17h-71.48v81.13c0 0-2.49 54.64 71.48 20.08 0 16.49 0 41.75 0 44.58-2.59 4.35-133.33 47.75-133.33-61.45 0-30.65 0-84.34 0-84.34h-28.12v-11.64l74.3-83.54h15.67v53.01z"
+                        />
+                    </g>
+                </g>
+            </svg>
+        );
+
         const IconEdit3 = ({ size = 16, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         );
@@ -164,21 +187,6 @@
             }
         };
 
-        const ThomannLogo = ({ color = "#00b5bd", className = "w-12 h-12" }) => (
-           <svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0.07086614173203998 566.929133858268 566.929133858268" width="567" height="567">
-	        <style>
-		    .s0 { fill: #00b2be } 
-		    .s1 { fill: #fefefe } 
-	        </style>
-	        <g id="Ebene 1">
-		    <path id="&lt;Path&gt;" fill-rule="evenodd" class="s0" d="m524.41 283.53c0-133.07-107.87-240.94-240.94-240.94-133.08 0-240.95 107.87-240.95 240.94 0 133.08 107.87 240.95 240.95 240.95 133.07 0 240.94-107.87 240.94-240.95z"/>
-		    <g id="&lt;Group&gt;">
-			<path id="&lt;Path&gt;" fill-rule="evenodd" class="s1" d="m355.43 209.99v42.17h-71.48v81.13c0 0-2.49 54.64 71.48 20.08 0 16.49 0 41.75 0 44.58-2.59 4.35-133.33 47.75-133.33-61.45 0-30.65 0-84.34 0-84.34h-28.12v-11.64l74.3-83.54h15.67v53.01z"/>
-		    </g>
-	        </g>
-            </svg>
-        );
-
         function App() {
             const [activeTab, setActiveTab] = useState('input');
             const [brandName, setBrandName] = useState('');
@@ -238,12 +246,20 @@
                 const opt = {
                     margin: [15, 15, 20, 15],
                     filename: filename,
-                    image: { type: 'jpeg', quality: 1.0 },
-                    html2canvas: { scale: 3, useCORS: true, letterRendering: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], avoid: ['.prevent-split'] }
+                    // Use PNG for lossless multi-page quality
+                    image: { type: 'png', quality: 1 }, 
+                    html2canvas: { 
+                        scale: 2, 
+                        useCORS: true, 
+                        letterRendering: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+                    // 'canvas' mode prevents quality drop on subsequent pages
+                    pagebreak: { mode: 'css' }
                 };
-                
+
                 try {
                     await window.html2pdf().set(opt).from(element).save();
                     setShowSuccess(true);
@@ -264,7 +280,7 @@
                     <header className="bg-white border-b border-slate-200 sticky top-0 z-50 no-pdf">
                         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <ThomannLogo className="w-8 h-8" />
+                                <ThomannLogo className="w-8 h-8" size={32} />
                                 <h1 className="text-[10px] font-bold uppercase tracking-widest">
                                     Thomann <span className="text-[#00b5bd]">Retail Media</span>
                                 </h1>
@@ -308,8 +324,8 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Internal Context</label>
-                                            <textarea className="w-full mt-2 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm h-24 outline-none focus:ring-1 focus:ring-[#00b5bd] resize-none" value={additionalDetails} onChange={(e) => setAdditionalDetails(e.target.value)} placeholder="Brief internal background..." />
+                                            <label className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Context</label>
+                                            <textarea className="w-full mt-2 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm h-24 outline-none focus:ring-1 focus:ring-[#00b5bd] resize-none" value={additionalDetails} onChange={(e) => setAdditionalDetails(e.target.value)} placeholder="Brief background..." />
                                         </div>
                                     </section>
 
@@ -368,7 +384,7 @@
                                     <div id="proposal-content" className="bg-white p-12 md:p-16 text-slate-900 shadow-xl print-container">
                                         <div className="flex justify-between items-start mb-20">
                                             <div className="space-y-6">
-                                                <ThomannLogo className="w-12 h-12" />
+                                                <ThomannLogo className="w-16 h-16" size={64} />
                                                 <div className="pt-4">
                                                     <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#00b5bd] mb-2">Retail Media Proposal</p>
                                                     <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-black leading-none">{brandName || '[Partner Name]'}</h1>
@@ -389,7 +405,7 @@
                                                         {timing && <div className="text-xs"><span className="font-bold text-black uppercase block text-[8px] mb-1 tracking-wider">Timing</span><span className="text-black font-extrabold uppercase text-sm">{timing}</span></div>}
                                                         {generalTargeting && <div className="text-xs"><span className="font-bold text-black uppercase block text-[8px] mb-1 tracking-wider">Targeting</span><span className="text-black font-extrabold uppercase text-sm">{generalTargeting}</span></div>}
                                                     </div>
-                                                    {additionalDetails && <div className="text-xs text-slate-600 leading-relaxed pt-4 border-t border-slate-50"><span className="font-bold text-black uppercase block text-[8px] mb-1 tracking-wider">Campaign Context</span><p className="text-black/80">{additionalDetails}</p></div>}
+                                                    {additionalDetails && <div className="text-xs text-slate-600 leading-relaxed pt-4 border-t border-slate-50"><span className="font-bold text-black uppercase block text-[8px] mb-1 tracking-wider">Context</span><p className="text-black/80">{additionalDetails}</p></div>}
                                                 </div>
                                             </div>
                                         )}
@@ -415,7 +431,7 @@
 
                                         <div className="mt-20 prevent-split">
                                             <div className="bg-slate-50 p-12 rounded-3xl border border-slate-100">
-                                                <h3 className="text-[10px] font-black uppercase tracking-widest text-[#00b5bd] mb-8">Investment Recapitulation</h3>
+                                                <h3 className="text-[10px] font-black uppercase tracking-widest text-[#00b5bd] mb-8">Investment Summary</h3>
                                                 <div className="space-y-4 mb-10">
                                                     {sortedSelectedFormats.map(f => (
                                                         <div key={`inv-${f.id}`} className="flex justify-between items-center text-[11px] font-bold border-b border-slate-200/50 pb-3"><span className="text-slate-500 uppercase tracking-tight">{f.name}</span><span className="text-black">€ {f.budget.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span></div>
